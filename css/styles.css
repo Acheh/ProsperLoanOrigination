@@ -6,3 +6,19 @@ h2 {
   text-align: left;
   color: black;
 }
+
+.axis--x text {
+  cursor: default;
+  pointer-events: all;
+  text-anchor: end;
+}
+
+.axis--x-label {
+  text-anchor: middle;
+  opacity: .75;
+}
+
+.axis--y-label {
+  opacity: .75;
+}
+
