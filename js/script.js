@@ -7,6 +7,9 @@ function draw(data) {
   const GRAPH_WIDTH = CANVAS_WIDTH - MARGIN.right - MARGIN.left;
   const GRAPH_HEIGHT = CANVAS_HEIGHT - MARGIN.top - MARGIN.bottom;
 
+  const ANIMATE_DURATION = 500;
+  const ANIMATE_DELAY = 20;
+
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   
   // process the data for barchart
@@ -92,6 +95,13 @@ function draw(data) {
           .attr('height', function(d) { return yScales(d[0]) - yScales(d[1]); })
           .attr('width', xScales.bandwidth())
           .on('mouseover', function(d){ console.log('mouseover'); })
+
+  // add fill color animation based on loan risk level
+  d3.selectAll('.risk_group')
+    .transition()
+    .attr('fill', function(d) { return zScales(d.key)})
+    .duration(ANIMATE_DURATION)
+    .delay(ANIMATE_DELAY)
 
   /*
     Functions
