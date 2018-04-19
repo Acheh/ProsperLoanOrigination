@@ -14,6 +14,16 @@ function draw(data) {
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
+  const MAX_YS = {};
+  for (i in RISK_LEVELS){
+    let max = 0;
+    for (p in data) {
+      if (data[p][RISK_LEVELS[i]]['amount'] > max){
+        max = data[p][RISK_LEVELS[i]]['amount'];
+      }
+    }
+    MAX_YS[RISK_LEVELS[i]] = max;
+  }
 
   // variables to control graph display
   let selectedDataDisplay = 'dollar'; // display in dollar or percentage amount.
@@ -153,6 +163,48 @@ function draw(data) {
     .text(function(d) { return d === 'dollar' ? '$' : '%'; });
 
   /*
+    Add legend and control whether to display all or only a certain risk level
+  */
+  let legend = g.append('g')
+    .attr('font-size', 12)
+    .attr('text-anchor', 'end')
+
+  legend.append('text')
+    .text('Loan Grade')
+    .attr('x', GRAPH_WIDTH)
+    .style('font-weight', 'bold')
+    .attr('dy', 100)
+    .attr('dx', 20)
+
+  let legendEnter = legend
+    .selectAll('g')
+    .data(RISK_LEVELS)
+    .enter().append('g')
+      .attr('class', 'legend')
+      .attr('transform', function (d, i) { return 'translate(0,' + (110 + i * 20) + ')'; })
+      .attr('value', function(d) { return d; })
+      .attr('opacity', 1)
+      .style('pointer-events', 'all')
+      .on('click', function(d) {
+        selectedRiskDisplay = (selectedRiskDisplay + 1) % 2;
+        selectedRisk = d3.select(this).attr('value');
+        updateLegend();
+        updateChart()
+      })
+
+  legendEnter.append('rect')
+    .attr('x', GRAPH_WIDTH)
+    .attr('width', 19)
+    .attr('height', 19)
+    .attr('fill', function(d) { return zScales(d)})
+
+  legendEnter.append('text')
+    .attr('x', GRAPH_WIDTH - 10)
+    .attr('y', 9.5)
+    .attr('dy', '0.32em')
+    .text(d => d)
+
+  /*
     Functions
   */
 
@@ -227,9 +279,24 @@ function draw(data) {
       .selectAll('rect')
       .transition()
       .duration(ANIMATE_DURATION)
-      .delay(ANIMATE_DELAY)
+      .delay(function(d) {
+        return selectedRiskDisplay === 1 ? ANIMATE_DELAY + ANIMATE_DURATION : ANIMATE_DELAY;
+      })
       .attr('y', function(d) { return updateBarY(d); })
       .attr('height', function(d) { return updateBarHeight(d); })
+
+    d3.selectAll('.risk_group')
+      .transition()
+      .duration(ANIMATE_DURATION)
+      .delay(function(d) {
+        return selectedRiskDisplay === 1 ? ANIMATE_DELAY : ANIMATE_DELAY + ANIMATE_DURATION;
+      })
+      .attr('opacity', function(d) { // display which bar to show/hide
+        if (selectedRiskDisplay === 1 && d3.select(this).attr('value') !== selectedRisk) {
+          return 0;
+        }
+        return 1;
+      })
   }
 
   function updateYScale() {
@@ -262,7 +329,7 @@ function draw(data) {
         y0 = y0/sumData[d.data.period] * 100;
         y1 = y1/sumData[d.data.period] * 100;
     }
-    return yScales(y1);
+    return selectedRiskDisplay === 1 ? yScales(y1 - y0) : yScales(y1);
   }
 
   function updateBarHeight(d) {
@@ -277,5 +344,31 @@ function draw(data) {
       y1 = y1/sumData[d.data.period] * 100;
     }
     return yScales(y0) - yScales(y1);
+  }
+
+  function updateLegend() {
+    d3.selectAll('.legend')
+      .transition()
+      .duration(ANIMATE_DURATION)
+      .delay(ANIMATE_DELAY)
+      .attr('opacity', function(d) {
+        if (selectedRiskDisplay === 1 && d3.select(this).attr('value') !== selectedRisk) {
+          return 0;
+        }
+        return 1;
+      })
+      .style('pointer-events', function(d) {
+        if(selectedRiskDisplay === 1 && d3.select(this).attr('value') !== selectedRisk) {
+          return 'none';
+        }
+        return 'all';
+      })
+      // control legend position
+      .attr('transform', function(d, i) {
+        if (selectedRiskDisplay === 1) {
+          return 'translate(0,' + 110 + ')';
+        }
+        return 'translate(0,' + (110 + i * 20) + ')';
+      })
   }
 };
