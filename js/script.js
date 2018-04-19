@@ -11,6 +11,7 @@ function draw(data) {
   const ANIMATE_DELAY = 20;
   const cMENU_OFF = '#f0f0f0'; // color for display menu when it's inactive
   const cMENU_ON = '#bdbdbd'; // color for diplay menu when it's active
+  const FORMAT_NUMBER = d3.format(',.2f'); // format numbers for display
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
@@ -203,6 +204,63 @@ function draw(data) {
     .attr('y', 9.5)
     .attr('dy', '0.32em')
     .text(d => d)
+
+  /*
+    Add a horizontal guide line and a label to display y value
+  */
+  let mouseG = canvas.append('g')
+    .attr('class', 'mouse_effect')
+
+  mouseG.append('path')
+    .attr('class', 'mouse-line')
+    .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
+
+  mouseG.append('text')
+    .attr('class', 'mouse-text')
+    .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('dx', '0.3em')
+
+  mouseG.append('rect')
+    .attr('width', GRAPH_WIDTH - MARGIN.right)
+    .attr('height', GRAPH_HEIGHT)
+    .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('mouseout', function() { // on mouse out hide line and text
+      d3.select('.mouse-line')
+        .style('opacity', '0');
+      d3.select('.mouse-text')
+        .style('opacity', '0')
+    })
+    .on('mouseover', function() { // on mouse in show line and text
+      d3.select('.mouse-line')
+        .style('opacity', '0.3');
+      d3.select('.mouse-text')
+        .style('opacity', '0.5')
+    })
+    .on('mousemove', function() { // mouse moving over canvas
+      let mouse = d3.mouse(this);
+
+      d3.select('.mouse-line')
+        .attr('d', function() {
+          let d = 'M' + (GRAPH_WIDTH - MARGIN.right) + ',' + mouse[1];
+          d += ' ' + 0 + ',' + mouse[1];
+          return d;
+      });
+
+      d3.select('.mouse-text')
+        .attr('y', function(d) {
+          return mouse[1] - 5;
+        })
+        .text(function(d) {
+          if (selectedDataDisplay === 'dollar') {
+            return '$' + FORMAT_NUMBER(yScales.invert(mouse[1])/1000000) + ' million';
+          }
+          return FORMAT_NUMBER(yScales.invert(mouse[1])) + ' %';
+        })
+    })
 
   /*
     Functions
