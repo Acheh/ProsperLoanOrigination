@@ -9,8 +9,16 @@ function draw(data) {
 
   const ANIMATE_DURATION = 500;
   const ANIMATE_DELAY = 20;
+  const cMENU_OFF = '#f0f0f0'; // color for display menu when it's inactive
+  const cMENU_ON = '#bdbdbd'; // color for diplay menu when it's active
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
+  const DISPLAY_OPTION = ['dollar', 'percent'];
+
+  // variables to control graph display
+  let selectedDataDisplay = 'dollar'; // display in dollar or percentage amount.
+  let selectedRiskDisplay = 0; // 0: display all risks; 1: display selected risk only.
+  let selectedRisk = 'none';
   
   // process the data for barchart
   processedData = processData();
@@ -94,7 +102,6 @@ function draw(data) {
           .attr('y', function(d) { return yScales(d[1]); })
           .attr('height', function(d) { return yScales(d[0]) - yScales(d[1]); })
           .attr('width', xScales.bandwidth())
-          .on('mouseover', function(d){ console.log('mouseover'); })
 
   // add fill color animation based on loan risk level
   d3.selectAll('.risk_group')
@@ -102,6 +109,48 @@ function draw(data) {
     .attr('fill', function(d) { return zScales(d.key)})
     .duration(ANIMATE_DURATION)
     .delay(ANIMATE_DELAY)
+
+  /*
+    Control view on whether to display data in dollar or percentage amount
+  */
+  let displayMenu = g.append('g')
+    .attr('transform', function () { return 'translate(-10,-50)'; })
+
+  displayMenu.append('text')
+    .attr('x', 4)
+    .attr('y', 10)
+    .attr('dy', '.35em')
+    .attr('pointer-events', 'none')
+    .text('Display data in: ')
+
+  let displayOptions = displayMenu.append('g')
+    .selectAll('g')
+    .data(DISPLAY_OPTION)
+    .enter().append('g')
+    .attr('transform', function (d, i) { return 'translate('+ (110 + 25*i) +',0)'; })
+
+  displayOptions.append('rect')
+    .attr('class', 'display--option-button')
+    .attr('pointer-events', function(d) { return d === 'dollar' ? 'none' : 'all'; })
+    .attr('value', function(d) {return d;})
+    .attr('width', 24)
+    .attr('height', 19)
+    .attr('fill', function(d) { return selectedDataDisplay === d ? cMENU_ON : cMENU_OFF; })
+    .on('click', function(d) {
+      selectedDataDisplay = d3.select(this).attr('value');
+      updateDisplayOptions();
+      updateChart();
+    })
+
+  displayOptions.append('text')
+    .attr('class', 'display--option-text')
+    .attr('x', 4)
+    .attr('y', 10)
+    .attr('dy', '.35em')
+    .attr('pointer-events', 'none')
+    .attr('opacity', function(d) { return selectedDataDisplay === d ? 1 : 0.5; })
+    .style('font-weight', function(d) { return selectedDataDisplay === d ? 'bold' : 'auto'; })
+    .text(function(d) { return d === 'dollar' ? '$' : '%'; });
 
   /*
     Functions
@@ -137,4 +186,96 @@ function draw(data) {
 
     return [dataSum, stack(flatData)];
   };
+
+  function updateDisplayOptions() {
+    /*
+      Update the active and the inactive display options
+    */
+    d3.selectAll('.display--option-button')
+      .attr('fill', function(d) { return selectedDataDisplay === d ? cMENU_ON : cMENU_OFF; })
+      .attr('pointer-events', function(d) { return selectedDataDisplay === d ? 'none' : 'all'; })
+
+    d3.selectAll('.display--option-text')
+      .style('font-weight', function(d){ return selectedDataDisplay === d ? 'bold' : 'auto'; })
+      .attr('opacity', function(d) { return selectedDataDisplay === d ? 1 : 0.5; })
+  }
+
+  function updateChart() {
+    /*
+      Update chart to display data in $ or % based on user selection
+    */
+    updateYScale();
+
+    d3.select('.axis--y')
+      .transition()
+      .call(d3.axisLeft(yScales).tickFormat(function(d) { return updateYAxis(d); }))
+      .duration(ANIMATE_DURATION)
+      .delay(ANIMATE_DELAY)
+
+    d3.select('.axis--y-label')
+      .transition()
+      .text(function(d) {
+        if (selectedDataDisplay === 'dollar') {
+          return 'loan amount (in million USD)';
+        }
+        return 'loan amount (in percentage)';
+      })
+      .duration(ANIMATE_DURATION)
+      .delay(ANIMATE_DELAY)
+
+    d3.selectAll('.risk_group')
+      .selectAll('rect')
+      .transition()
+      .duration(ANIMATE_DURATION)
+      .delay(ANIMATE_DELAY)
+      .attr('y', function(d) { return updateBarY(d); })
+      .attr('height', function(d) { return updateBarHeight(d); })
+  }
+
+  function updateYScale() {
+    /*
+      update the y scale of the barchart based on user selection
+    */
+    if (selectedDataDisplay === 'percent'){
+      yScales.domain([0,100]);
+    } else if (selectedRiskDisplay === 1) {
+        yScales.domain([0, MAX_YS[selectedRisk]]);
+    }
+    else {
+        yScales.domain(
+          [0, d3.max(stackedData[stackedData.length - 1],
+          function(d) { return d[1]; })]
+        );
+    }
+  }
+
+  function updateYAxis(d) { return selectedDataDisplay === 'dollar' ? d/1000000 : d; }
+
+  function updateBarY(d) {
+    /*
+      update the y attribute of the barchart based on user selection
+    */
+    let y0 = d[0];
+    let y1 = d[1];
+
+    if (selectedDataDisplay === 'percent' && sumData[d.data.period] !== 0) {
+        y0 = y0/sumData[d.data.period] * 100;
+        y1 = y1/sumData[d.data.period] * 100;
+    }
+    return yScales(y1);
+  }
+
+  function updateBarHeight(d) {
+    /*
+      update the height attribute of the barchart based on user selection
+    */
+    let y0 = d[0];
+    let y1 = d[1];
+
+    if (selectedDataDisplay === 'percent' && sumData[d.data.period] !== 0) {
+      y0 = y0/sumData[d.data.period] * 100;
+      y1 = y1/sumData[d.data.period] * 100;
+    }
+    return yScales(y0) - yScales(y1);
+  }
 };
