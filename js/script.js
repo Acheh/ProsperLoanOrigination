@@ -15,6 +15,7 @@ function draw(data) {
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
+  const TABLE_HEADER = ['Risk Level', 'Count', '% Amount', '$ Amount', 'Avg Amount'];
   const MAX_YS = {};
   for (i in RISK_LEVELS){
     let max = 0;
@@ -51,7 +52,7 @@ function draw(data) {
     .append('svg')
     .attr('id', 'canvas')
     .attr('width', CANVAS_WIDTH)
-    .attr('height',CANVAS_HEIGHT);
+    .attr('height',CANVAS_HEIGHT + 200);
 
   let g = canvas.append('g')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')');
@@ -64,6 +65,15 @@ function draw(data) {
   xScales.domain(stackedData[0].map(function(d) { return d.data.period; }));
   yScales.domain([0, d3.max(stackedData[stackedData.length - 1], function(d) { return d[1]; })]);
   zScales.range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']);
+
+  // custom invert function
+  xScales.invert = (function(){
+    var domain = xScales.domain()
+    var range = xScales.range()
+    var scale = d3.scaleQuantize().domain(range).range(domain)
+
+    return function(x){ return scale(x); };
+    })()
 
   // add x-axis
   g.append('g')
@@ -206,15 +216,44 @@ function draw(data) {
     .text(d => d)
 
   /*
-    Add a horizontal guide line and a label to display y value
+    Add a summary table, a horizontal guide line, and a label to display y value
+    based on mouse interaction
   */
+
+  // the summary table
+  let tableView = canvas.append('g')
+    .attr('opacity', 1)
+    .attr('transform',
+      'translate(' + (MARGIN.left + 120) + "," + (GRAPH_HEIGHT + MARGIN.top + MARGIN.bottom) + ")")
+
+  tableView.append('g')
+    .selectAll('text')
+    .data(TABLE_HEADER).enter()
+      .append('text')
+      .attr('text-anchor', 'end')
+      .style('font-weight', 'bold')
+      .text(function(d) { return d; })
+      .attr('x', function(d,i) { return 100+i*120; })
+
+  tableView.append('g')
+    .attr('id', 'table--body')
+    .selectAll('g')
+    .data(RISK_LEVELS).enter()
+      .append('g')
+      .attr('class', 'table--rows')
+      .selectAll('text')
+      .data(TABLE_HEADER).enter()
+        .append('text')
+
   let mouseG = canvas.append('g')
     .attr('class', 'mouse_effect')
 
+  // the horizontal guide line
   mouseG.append('path')
     .attr('class', 'mouse-line')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
 
+  // the y value text for horizontal guide line
   mouseG.append('text')
     .attr('class', 'mouse-text')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
@@ -222,6 +261,7 @@ function draw(data) {
     .attr('y', 0)
     .attr('dx', '0.3em')
 
+  // the rectangle over the graph as the mouse event listener
   mouseG.append('rect')
     .attr('width', GRAPH_WIDTH - MARGIN.right)
     .attr('height', GRAPH_HEIGHT)
@@ -232,7 +272,8 @@ function draw(data) {
       d3.select('.mouse-line')
         .style('opacity', '0');
       d3.select('.mouse-text')
-        .style('opacity', '0')
+        .style('opacity', '0');
+      tableView.attr('opacity', 0);
     })
     .on('mouseover', function() { // on mouse in show line and text
       d3.select('.mouse-line')
@@ -242,6 +283,9 @@ function draw(data) {
     })
     .on('mousemove', function() { // mouse moving over canvas
       let mouse = d3.mouse(this);
+
+      tableView.attr('opacity', 1);
+      updateTable(xScales.invert(d3.mouse(this)[0]));
 
       d3.select('.mouse-line')
         .attr('d', function() {
@@ -428,5 +472,81 @@ function draw(data) {
         }
         return 'translate(0,' + (110 + i * 20) + ')';
       })
+  }
+
+  function updateTable(period) {
+    /*
+      update table content based on mouse position
+    */
+    let tData = processTableData(period);
+
+    d3.select('#table--body').selectAll('.table--rows')
+      .data(tData)
+      .exit().remove()
+
+    d3.select('#table--body').selectAll('.table--rows')
+      .data(tData).enter()
+        .append('g')
+        .attr('class', 'table--rows')
+        .selectAll('text')
+        .data(function(d) { return d; }).enter()
+          .append('text')
+
+    d3.selectAll('.table--rows')
+      .data(tData)
+      .attr('transform', function(d,i) {
+          return 'translate(0,' + 20*(i+1) + ")";
+        })
+      .selectAll('text')
+        .data(function(d) { return d; })
+        .attr('class', function(d,i) { return 'table--cells table--cells-' + i; })
+        .attr('x', function(d,i) { return 100+i*120; })
+        .text(function(d, i) {
+          return i === 0 ? Object.values(d) : FORMAT_NUMBER(Object.values(d));
+        })
+
+  }
+
+  function processTableData(period) {
+    /*
+      Process data for table display.
+      Returns:
+        An array of array consists of loan count, percent amount, dollar amount,
+        and average amount for each period selection.
+    */
+    let flatTable = [];
+    let riskSelection = selectedRiskDisplay === 0? RISK_LEVELS : [selectedRisk];
+    let totalCount = 0;
+    let totalPercent = sumData[period] === 0 ? 0 : 100;
+    let totalAmount = 0;
+    let totalAverage = 0;
+
+    debugger;
+
+    for (i in riskSelection) {
+      let risk = riskSelection[i];
+      let fData = [];
+
+      totalCount += data[period][risk].count;
+      totalAmount += data[period][risk].amount;
+
+      fData.push({risk: risk});
+      fData.push({count: data[period][risk].count});
+      fData.push({percent: sumData[period] === 0 ? 0 : data[period][risk].amount/sumData[period]});
+      fData.push({amount: data[period][risk].amount});
+      fData.push({average: data[period][risk].count === 0 ? 0 : data[period][risk].amount/data[period][risk].count});
+
+      flatTable.push(fData);
+    }
+
+    totalAverage = totalCount === 0 ? 0 : totalAmount/totalCount;
+
+    flatTable.push([{risk: 'Total'},
+      {count: totalCount},
+      {percent: totalPercent},
+      {amount: totalAmount},
+      {average: totalAverage}])
+
+    return flatTable;
   }
 };
