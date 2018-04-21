@@ -16,7 +16,7 @@ function draw(data) {
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
-  const TABLE_HEADER = ['Risk Level', 'Count', '% Amount', '$ Amount', 'Avg Amount'];
+  const TABLE_HEADER = ['Loan Grade', 'Count', '% Amount', '$ Amount', 'Avg Amount'];
   const COLUMN_DATA = ['count', 'percent', 'amount', 'average'];
   const MAX_YS = {};
   for (i in RISK_LEVELS){
@@ -569,7 +569,7 @@ function draw(data) {
     totalAverage = totalCount === 0 ? 0 : totalAmount/totalCount;
 
     if (riskSelection.length !== 1) {
-      flatTable.unshift([{risk: 'Total'},
+      flatTable.unshift([{risk: 'all'},
       {count: totalCount},
       {percent: totalPercent},
       {amount: totalAmount},
