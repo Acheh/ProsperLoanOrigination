@@ -84,9 +84,6 @@ function draw(data) {
       .attr('dx', '-.8em')
       .attr('dy', '-.4em')
       .attr('transform', 'rotate(-60)')
-      .on('mouseover', function (d) {
-        console.log(d);
-      })
 
   // add x-axis label
   g.append('text')
