@@ -37,8 +37,6 @@ function draw(data) {
   let sumData = processedData[0]; // data dict of total loan amount in each quarter
   let stackedData = processedData[1]; // stack of loan amount by risk by quarter
 
-  debugger;
-
   /*
     Draw the initial graph
   */
@@ -250,7 +248,7 @@ function draw(data) {
 
   // the horizontal guide line
   mouseG.append('path')
-    .attr('class', 'mouse-line')
+    .attr('class', 'mouse-line mouse--line-x')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
 
   // the y value text for horizontal guide line
@@ -261,6 +259,12 @@ function draw(data) {
     .attr('y', 0)
     .attr('dx', '0.3em')
 
+  // the vertical guide line
+  mouseG.append('path')
+    .attr('class', 'mouse-line mouse--line-y')
+    .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
+  //  .attr('transform', 'rotate(90)')
+
   // the rectangle over the graph as the mouse event listener
   mouseG.append('rect')
     .attr('width', GRAPH_WIDTH - MARGIN.right)
@@ -269,14 +273,14 @@ function draw(data) {
     .attr('fill', 'none')
     .attr('pointer-events', 'all')
     .on('mouseout', function() { // on mouse out hide line and text
-      d3.select('.mouse-line')
+      d3.selectAll('.mouse-line')
         .style('opacity', '0');
       d3.select('.mouse-text')
         .style('opacity', '0');
       tableView.attr('opacity', 0);
     })
     .on('mouseover', function() { // on mouse in show line and text
-      d3.select('.mouse-line')
+      d3.selectAll('.mouse-line')
         .style('opacity', '0.3');
       d3.select('.mouse-text')
         .style('opacity', '0.5')
@@ -287,10 +291,18 @@ function draw(data) {
       tableView.attr('opacity', 1);
       updateTable(xScales.invert(d3.mouse(this)[0]));
 
-      d3.select('.mouse-line')
+      d3.select('.mouse--line-x')
         .attr('d', function() {
           let d = 'M' + (GRAPH_WIDTH - MARGIN.right) + ',' + mouse[1];
           d += ' ' + 0 + ',' + mouse[1];
+          return d;
+      });
+
+      d3.select('.mouse--line-y')
+        .attr('d', function() {
+          let x = xScales(xScales.invert(mouse[0])) + 11.5;
+          let d = 'M' + x + ',' + mouse[1];
+          d += ' ' + x + ',' + yScales(0);
           return d;
       });
 
@@ -520,8 +532,6 @@ function draw(data) {
     let totalPercent = sumData[period] === 0 ? 0 : 100;
     let totalAmount = 0;
     let totalAverage = 0;
-
-    debugger;
 
     for (i in riskSelection) {
       let risk = riskSelection[i];
