@@ -11,7 +11,8 @@ function draw(data) {
   const ANIMATE_DELAY = 20;
   const cMENU_OFF = '#f0f0f0'; // color for display menu when it's inactive
   const cMENU_ON = '#bdbdbd'; // color for diplay menu when it's active
-  const FORMAT_NUMBER = d3.format(',.2f'); // format numbers for display
+  const FORMAT_DOUBLE = d3.format(',.2f'); // format numbers for display
+  const FORMAT_NUMBER = d3.format(',.0f'); // format numbers for display
 
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
@@ -309,9 +310,9 @@ function draw(data) {
         })
         .text(function(d) {
           if (selectedDataDisplay === 'dollar') {
-            return '$' + FORMAT_NUMBER(yScales.invert(mouse[1])/1000000) + ' million';
+            return '$' + FORMAT_DOUBLE(yScales.invert(mouse[1])/1000000) + ' million';
           }
-          return FORMAT_NUMBER(yScales.invert(mouse[1])) + ' %';
+          return FORMAT_DOUBLE(yScales.invert(mouse[1])) + ' %';
         })
     })
 
@@ -511,7 +512,13 @@ function draw(data) {
         .attr('class', function(d,i) { return 'table--cells table--cells-' + i; })
         .attr('x', function(d,i) { return 100+i*120; })
         .text(function(d, i) {
-          return i === 0 ? Object.values(d) : FORMAT_NUMBER(Object.values(d));
+          if( i === 0) {
+            return Object.values(d);
+          } else if (Object.keys(d)[0] === 'percent'){
+            return FORMAT_DOUBLE(Object.values(d));
+          } else {
+            return FORMAT_NUMBER(Object.values(d));
+          }
         })
 
   }
