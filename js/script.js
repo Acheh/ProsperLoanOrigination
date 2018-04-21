@@ -17,6 +17,7 @@ function draw(data) {
   const RISK_LEVELS = ['AA', 'A', 'B', 'C', 'D', 'E', 'HR'];
   const DISPLAY_OPTION = ['dollar', 'percent'];
   const TABLE_HEADER = ['Risk Level', 'Count', '% Amount', '$ Amount', 'Avg Amount'];
+  const COLUMN_DATA = ['count', 'percent', 'amount', 'average'];
   const MAX_YS = {};
   for (i in RISK_LEVELS){
     let max = 0;
@@ -218,7 +219,7 @@ function draw(data) {
 
   // the summary table
   let tableView = canvas.append('g')
-    .attr('opacity', 1)
+    .attr('opacity', 0)
     .attr('transform',
       'translate(' + (MARGIN.left + 120) + "," + (GRAPH_HEIGHT + MARGIN.top + MARGIN.bottom) + ")")
 
@@ -507,6 +508,11 @@ function draw(data) {
       .attr('transform', function(d,i) {
           return 'translate(0,' + 20*(i+1) + ")";
         })
+      .attr('font-weight', function(d) {
+        if (d[0].risk === 'Total') {
+          return 'bold';
+        }
+      })
       .selectAll('text')
         .data(function(d) { return d; })
         .attr('class', function(d,i) { return 'table--cells table--cells-' + i; })
@@ -520,7 +526,14 @@ function draw(data) {
             return FORMAT_NUMBER(Object.values(d));
           }
         })
-
+        .attr('font-weight', function(d,i) {
+          if (i === 0 ){
+            return 'bold';
+          } else if (Object.values(d)[0] ===
+            d3.max(tData.slice(1,8), function(d){ return d[i][COLUMN_DATA[i-1]]; })) {
+              return 'bold';
+          }
+        })
   }
 
   function processTableData(period) {
