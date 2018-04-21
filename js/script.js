@@ -551,11 +551,13 @@ function draw(data) {
 
     totalAverage = totalCount === 0 ? 0 : totalAmount/totalCount;
 
-    flatTable.push([{risk: 'Total'},
+    if (riskSelection.length !== 1) {
+      flatTable.unshift([{risk: 'Total'},
       {count: totalCount},
       {percent: totalPercent},
       {amount: totalAmount},
       {average: totalAverage}])
+    }
 
     return flatTable;
   }
