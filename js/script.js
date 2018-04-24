@@ -277,6 +277,9 @@ function draw(data) {
       d3.select('.mouse-text')
         .style('opacity', '0');
       tableView.attr('opacity', 0);
+      d3.select('.axis--x')
+        .selectAll('.tick')
+        .attr('font-weight', 'none')
     })
     .on('mouseover', function() { // on mouse in show line and text
       d3.selectAll('.mouse-line')
@@ -288,7 +291,7 @@ function draw(data) {
       let mouse = d3.mouse(this);
 
       tableView.attr('opacity', 1);
-      updateTable(xScales.invert(d3.mouse(this)[0]));
+      updateTable(xScales.invert(mouse[0]));
 
       d3.select('.mouse--line-x')
         .attr('d', function() {
@@ -315,6 +318,11 @@ function draw(data) {
           }
           return FORMAT_DOUBLE(yScales.invert(mouse[1])) + ' %';
         })
+
+      d3.select('.axis--x')
+        .selectAll('.tick')
+        .attr('font-weight', function(d) {
+          return xScales.invert(mouse[0]) === d ? 'bold' : 'none';})
     })
 
   /*
