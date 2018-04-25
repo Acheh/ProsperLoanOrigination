@@ -14,6 +14,11 @@ https://bl.ocks.org/Acheh/raw/19a72782788e3df91f468c110ffefaf8/
 
 Based on feedback, it seems that viewer has a hard time finding out the exact y-value dispite the help from horintal guide line and apparently, a harder time finding out the y-value on certain loan grade without having to filter (only display that particular grade). As remedy, the graph is now equipt with a vertical guide line as a mouse event to display the x-axis (quarter period) at current cursor position. Further more, a table showing loan origination percentage, amount, count, and average amount in each grade and also in all grade (total) is displayed based on current cursor position. The inclusion of loan count and average loan amount was inspired by feedback questioning whether the increase in quarterly loan origination amount due to increase in loan count or increase in average loan amount instead. Therefore, the maximum values in each column is styled in bold for easy recognition on this matter.
 
+Version 3 - Final Version
+https://bl.ocks.org/Acheh/raw/5f47d26b8e793027a5a33f8bed53ac87/
+
+Fix errors on the percentage amount display on the table that were reported on a feedback. Add tooltip to Loan Grade legend to let viewer know that legends are clickable.
+
 Feedback
 
 Version 1
@@ -50,4 +55,3 @@ Hey, this is a very creative way to display data! I like that you can get the su
 PETER BAKKE - Fellow Udacian
 
 Hi @ykrueng, brilliant. I think the additional of the table is perfect. It does a terrific job of backing up the visual above and I like how you even highlighted the largest loan grade in each quarter. I have no other comments than than well done! I imagine you stretched your knowledge about Tableau during this process, as well. Super!  :slightly_smiling_face:
-
