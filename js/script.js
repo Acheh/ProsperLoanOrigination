@@ -46,7 +46,7 @@ function draw(data) {
   // add title to the graph
   d3.select('body')
     .append('h2')
-      .text(GRAPH_TITLE);
+      .text(GRAPH_TITLE)
 
   let canvas = d3.select('body')
     .append('svg')
@@ -567,7 +567,7 @@ function draw(data) {
 
       fData.push({risk: risk});
       fData.push({count: data[period][risk].count});
-      fData.push({percent: sumData[period] === 0 ? 0 : data[period][risk].amount/sumData[period]});
+      fData.push({percent: sumData[period] === 0 ? 0 : data[period][risk].amount/sumData[period]*100});
       fData.push({amount: data[period][risk].amount});
       fData.push({average: data[period][risk].count === 0 ? 0 : data[period][risk].amount/data[period][risk].count});
 
