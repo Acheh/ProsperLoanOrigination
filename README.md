@@ -55,3 +55,10 @@ Hey, this is a very creative way to display data! I like that you can get the su
 PETER BAKKE - Fellow Udacian
 
 Hi @ykrueng, brilliant. I think the additional of the table is perfect. It does a terrific job of backing up the visual above and I like how you even highlighted the largest loan grade in each quarter. I have no other comments than than well done! I imagine you stretched your knowledge about Tableau during this process, as well. Super!  :slightly_smiling_face:
+
+Resources:
+- Let's Make a Bar Chart: https://bost.ocks.org/mike/bar/
+- Stack Bar Charts D3 V4: https://bl.ocks.org/DimsumPanda/689368252f55179e12185e13c5ed1fee
+- Simple d3.js tooltips: http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
+- Animated Grouped/Stacked Bar Transitions: https://bl.ocks.org/aholachek/fb0c1cd7ea9707bc8ff55a82402c54b1
+- Enter, Update, Exit - Christian Behrens - Medium: https://www.youtube.com/watch?v=HE5Pbq6seZo
