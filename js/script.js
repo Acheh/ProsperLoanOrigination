@@ -18,7 +18,7 @@ function draw(data) {
   const DISPLAY_OPTION = ['dollar', 'percent'];
   const TABLE_HEADER = ['Loan Grade', 'Count', '% Amount', '$ Amount', 'Avg Amount'];
   const COLUMN_DATA = ['count', 'percent', 'amount', 'average'];
-  const MAX_YS = {};
+  const MAX_YS = {}; // maximum loan amount in each loan grade
   for (i in RISK_LEVELS){
     let max = 0;
     for (p in data) {
@@ -48,6 +48,7 @@ function draw(data) {
     .append('h2')
       .text(GRAPH_TITLE)
 
+  // add canvas
   let canvas = d3.select('body')
     .append('svg')
     .attr('id', 'canvas')
@@ -66,7 +67,7 @@ function draw(data) {
   yScales.domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])]);
   zScales.range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']);
 
-  // custom invert function
+  // add custom invert function for xScales
   xScales.invert = (function(){
     var domain = xScales.domain()
     var range = xScales.range()
@@ -130,6 +131,7 @@ function draw(data) {
   /*
     Control view on whether to display data in dollar or percentage amount
   */
+
   let displayMenu = g.append('g')
     .attr('transform', 'translate(-10,-50)')
 
@@ -153,7 +155,7 @@ function draw(data) {
     .attr('width', 24)
     .attr('height', 19)
     .attr('fill', d => selectedDataDisplay === d ? cMENU_ON : cMENU_OFF)
-    .on('click', function(d) {
+    .on('click', function(d) {  // on click update display option and chart
       selectedDataDisplay = d3.select(this).attr('value');
       updateDisplayOptions();
       updateChart();
@@ -172,6 +174,8 @@ function draw(data) {
   /*
     Add legend and control whether to display all or only a certain risk level
   */
+
+  // add tooltip to legend
   let legendTip = d3.select('body')
     .append('div')
     .attr('class', 'tooltip')
@@ -197,7 +201,7 @@ function draw(data) {
       .attr('value', d => d)
       .attr('opacity', 1)
       .style('pointer-events', 'all')
-      .on('mouseover', function(d) {
+      .on('mouseover', function(d) { // on mouseover display tooltip
         legendTip.transition()
           .duration(ANIMATE_DURATION)
           .style('opacity', .9);
@@ -205,12 +209,12 @@ function draw(data) {
           .style("left", (d3.event.pageX) + "px")
           .style("top", (d3.event.pageY - 28) + "px");
       })
-      .on('mouseout', function(d) {
+      .on('mouseout', function(d) { // on mouseout hide tooltip
         legendTip.transition()
           .duration(ANIMATE_DURATION)
           .style('opacity', 0)
       })
-      .on('click', function(d) {
+      .on('click', function(d) { // on click update chart and legend
         selectedRiskDisplay = (selectedRiskDisplay + 1) % 2;
         selectedRisk = d3.select(this).attr('value');
         updateLegend();
@@ -259,15 +263,16 @@ function draw(data) {
       .data(TABLE_HEADER).enter()
         .append('text')
 
+  // add the mouse hover effect to the graph
   let mouseG = canvas.append('g')
     .attr('class', 'mouse_effect')
 
-  // the horizontal guide line
+  // add a hover horizontal guide line
   mouseG.append('path')
     .attr('class', 'mouse-line mouse--line-x')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
 
-  // the y value text for horizontal guide line
+  // add a hover text for horizontal guide line
   mouseG.append('text')
     .attr('class', 'mouse-text')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
@@ -275,20 +280,19 @@ function draw(data) {
     .attr('y', 0)
     .attr('dx', '0.3em')
 
-  // the vertical guide line
+  // add a hover vertical guide line
   mouseG.append('path')
     .attr('class', 'mouse-line mouse--line-y')
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
-  //  .attr('transform', 'rotate(90)')
 
-  // the rectangle over the graph as the mouse event listener
+  // add a rectangle over the graph as the mouse event listener
   mouseG.append('rect')
     .attr('width', GRAPH_WIDTH - MARGIN.right)
     .attr('height', GRAPH_HEIGHT)
     .attr('transform', 'translate(' + MARGIN.left + ',' + MARGIN.top + ')')
     .attr('fill', 'none')
     .attr('pointer-events', 'all')
-    .on('mouseout', function() { // on mouse out hide line and text
+    .on('mouseout', function() { // on mouse out hide lines and text
       d3.selectAll('.mouse-line')
         .style('opacity', '0');
       d3.select('.mouse-text')
@@ -298,7 +302,7 @@ function draw(data) {
         .selectAll('.tick')
         .attr('font-weight', 'none')
     })
-    .on('mouseover', function() { // on mouse in show line and text
+    .on('mouseover', function() { // on mouse in show lines and text
       d3.selectAll('.mouse-line')
         .style('opacity', '0.3');
       d3.select('.mouse-text')
@@ -308,16 +312,16 @@ function draw(data) {
       let mouse = d3.mouse(this);
 
       tableView.attr('opacity', 1);
-      updateTable(xScales.invert(mouse[0]));
+      updateTable(xScales.invert(mouse[0])); // display a corresponding table
 
-      d3.select('.mouse--line-x')
+      d3.select('.mouse--line-x') // display hovering horizontal line
         .attr('d', function() {
           let d = 'M' + (GRAPH_WIDTH - MARGIN.right) + ',' + mouse[1];
           d += ' ' + 0 + ',' + mouse[1];
           return d;
       });
 
-      d3.select('.mouse--line-y')
+      d3.select('.mouse--line-y') // display hovering vertical line
         .attr('d', function() {
           let x = xScales(xScales.invert(mouse[0])) + 11.5;
           let d = 'M' + x + ',' + mouse[1];
@@ -325,7 +329,7 @@ function draw(data) {
           return d;
       });
 
-      d3.select('.mouse-text')
+      d3.select('.mouse-text') // display hovering text
         .attr('y', d => mouse[1] - 5)
         .text(function(d) {
           if (selectedDataDisplay === 'dollar') {
@@ -334,7 +338,7 @@ function draw(data) {
           return FORMAT_DOUBLE(yScales.invert(mouse[1])) + ' %';
         })
 
-      d3.select('.axis--x')
+      d3.select('.axis--x') // add hovering bold style to x-axis label
         .selectAll('.tick')
         .attr('font-weight', d => xScales.invert(mouse[0]) === d ? 'bold' : 'none')
     })
@@ -475,6 +479,9 @@ function draw(data) {
   }
 
   function updateLegend() {
+    /*
+      update legends based on user selection
+    */
     d3.selectAll('.legend')
       .transition()
       .duration(ANIMATE_DURATION)
