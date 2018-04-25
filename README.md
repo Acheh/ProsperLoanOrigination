@@ -40,3 +40,14 @@ The main take away is the comparison about the amount of loans among quarters fr
 PETER BAKKE - Fellow Udacian
 
 Hello Yashirah! This looks terrific. I think the labeling is done well and is understandable. And the stacked bars are informative. What story is being told by the data? For example, what happened in 2013, 4th quarter? ... things went wild! What happened?
+
+Version 2
+
+MATTHEW - Udacity Mentor
+
+Hey, this is a very creative way to display data! I like that you can get the summary and individual details. My takeaways are the same, although I wonder if average amount deserves it's own plot. (I think your % amounts need to be multiplied by 100 except on 'All). Great job!
+
+PETER BAKKE - Fellow Udacian
+
+Hi @ykrueng, brilliant. I think the additional of the table is perfect. It does a terrific job of backing up the visual above and I like how you even highlighted the largest loan grade in each quarter. I have no other comments than than well done! I imagine you stretched your knowledge about Tableau during this process, as well. Super!  :slightly_smiling_face:
+
