@@ -62,8 +62,8 @@ function draw(data) {
   let yScales = d3.scaleLinear().range([GRAPH_HEIGHT, 0]);
   let zScales = d3.scaleOrdinal();
 
-  xScales.domain(stackedData[0].map(function(d) { return d.data.period; }));
-  yScales.domain([0, d3.max(stackedData[stackedData.length - 1], function(d) { return d[1]; })]);
+  xScales.domain(stackedData[0].map(d => d.data.period));
+  yScales.domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])]);
   zScales.range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']);
 
   // custom invert function
@@ -71,8 +71,7 @@ function draw(data) {
     var domain = xScales.domain()
     var range = xScales.range()
     var scale = d3.scaleQuantize().domain(range).range(domain)
-
-    return function(x){ return scale(x); };
+    return x => scale(x);
     })()
 
   // add x-axis
@@ -96,7 +95,7 @@ function draw(data) {
   // add y-axis
   g.append('g')
     .attr('class', 'axis axis--y')
-    .call(d3.axisLeft(yScales).tickFormat(function(d) { return d/1000000; }))
+    .call(d3.axisLeft(yScales).tickFormat(d => d/1000000))
 
   // add y-axis label
   g.append('text')
@@ -110,21 +109,21 @@ function draw(data) {
     .data(stackedData)
       .enter().append('g')
         .attr('class', 'risk_group')
-        .attr('id', function(d) { return d.key; })
-        .attr('value', function(d) { return d.key; })
+        .attr('id', d => d.key)
+        .attr('value', d => d.key)
         .attr('fill', 'steelblue')
       .selectAll('rect')
-      .data(function(d) { return d; })
+      .data(d => d)
         .enter().append('rect')
-          .attr('x', function(d) { return xScales(d.data.period); })
-          .attr('y', function(d) { return yScales(d[1]); })
-          .attr('height', function(d) { return yScales(d[0]) - yScales(d[1]); })
+          .attr('x', d => xScales(d.data.period))
+          .attr('y', d => yScales(d[1]))
+          .attr('height', d => yScales(d[0]) - yScales(d[1]))
           .attr('width', xScales.bandwidth())
 
   // add fill color animation based on loan risk level
   d3.selectAll('.risk_group')
     .transition()
-    .attr('fill', function(d) { return zScales(d.key)})
+    .attr('fill', d => zScales(d.key))
     .duration(ANIMATE_DURATION)
     .delay(ANIMATE_DELAY)
 
@@ -132,7 +131,7 @@ function draw(data) {
     Control view on whether to display data in dollar or percentage amount
   */
   let displayMenu = g.append('g')
-    .attr('transform', function () { return 'translate(-10,-50)'; })
+    .attr('transform', 'translate(-10,-50)')
 
   displayMenu.append('text')
     .attr('x', 4)
@@ -145,15 +144,15 @@ function draw(data) {
     .selectAll('g')
     .data(DISPLAY_OPTION)
     .enter().append('g')
-    .attr('transform', function (d, i) { return 'translate('+ (110 + 25*i) +',0)'; })
+    .attr('transform', (d, i) => 'translate('+ (110 + 25*i) +',0)')
 
   displayOptions.append('rect')
     .attr('class', 'display--option-button')
-    .attr('pointer-events', function(d) { return d === 'dollar' ? 'none' : 'all'; })
-    .attr('value', function(d) {return d;})
+    .attr('pointer-events', d => d === 'dollar' ? 'none' : 'all')
+    .attr('value', d => d)
     .attr('width', 24)
     .attr('height', 19)
-    .attr('fill', function(d) { return selectedDataDisplay === d ? cMENU_ON : cMENU_OFF; })
+    .attr('fill', d => selectedDataDisplay === d ? cMENU_ON : cMENU_OFF)
     .on('click', function(d) {
       selectedDataDisplay = d3.select(this).attr('value');
       updateDisplayOptions();
@@ -166,9 +165,9 @@ function draw(data) {
     .attr('y', 10)
     .attr('dy', '.35em')
     .attr('pointer-events', 'none')
-    .attr('opacity', function(d) { return selectedDataDisplay === d ? 1 : 0.5; })
-    .style('font-weight', function(d) { return selectedDataDisplay === d ? 'bold' : 'auto'; })
-    .text(function(d) { return d === 'dollar' ? '$' : '%'; });
+    .attr('opacity', d => selectedDataDisplay === d ? 1 : 0.5)
+    .style('font-weight', d => selectedDataDisplay === d ? 'bold' : 'auto')
+    .text(d => d === 'dollar' ? '$' : '%')
 
   /*
     Add legend and control whether to display all or only a certain risk level
@@ -189,8 +188,8 @@ function draw(data) {
     .data(RISK_LEVELS)
     .enter().append('g')
       .attr('class', 'legend')
-      .attr('transform', function (d, i) { return 'translate(0,' + (110 + i * 20) + ')'; })
-      .attr('value', function(d) { return d; })
+      .attr('transform', (d, i) => 'translate(0,' + (110 + i * 20) + ')')
+      .attr('value', d => d)
       .attr('opacity', 1)
       .style('pointer-events', 'all')
       .on('click', function(d) {
@@ -204,7 +203,7 @@ function draw(data) {
     .attr('x', GRAPH_WIDTH)
     .attr('width', 19)
     .attr('height', 19)
-    .attr('fill', function(d) { return zScales(d)})
+    .attr('fill', d => zScales(d))
 
   legendEnter.append('text')
     .attr('x', GRAPH_WIDTH - 10)
@@ -229,8 +228,8 @@ function draw(data) {
       .append('text')
       .attr('text-anchor', 'end')
       .style('font-weight', 'bold')
-      .text(function(d) { return d; })
-      .attr('x', function(d,i) { return 100+i*120; })
+      .text(d => d)
+      .attr('x', (d,i) => 100+i*120)
 
   tableView.append('g')
     .attr('id', 'table--body')
@@ -309,9 +308,7 @@ function draw(data) {
       });
 
       d3.select('.mouse-text')
-        .attr('y', function(d) {
-          return mouse[1] - 5;
-        })
+        .attr('y', d => mouse[1] - 5)
         .text(function(d) {
           if (selectedDataDisplay === 'dollar') {
             return '$' + FORMAT_DOUBLE(yScales.invert(mouse[1])/1000000) + ' million';
@@ -321,8 +318,7 @@ function draw(data) {
 
       d3.select('.axis--x')
         .selectAll('.tick')
-        .attr('font-weight', function(d) {
-          return xScales.invert(mouse[0]) === d ? 'bold' : 'none';})
+        .attr('font-weight', d => xScales.invert(mouse[0]) === d ? 'bold' : 'none')
     })
 
   /*
@@ -365,12 +361,12 @@ function draw(data) {
       Update the active and the inactive display options
     */
     d3.selectAll('.display--option-button')
-      .attr('fill', function(d) { return selectedDataDisplay === d ? cMENU_ON : cMENU_OFF; })
-      .attr('pointer-events', function(d) { return selectedDataDisplay === d ? 'none' : 'all'; })
+      .attr('fill', d => selectedDataDisplay === d ? cMENU_ON : cMENU_OFF)
+      .attr('pointer-events', d => selectedDataDisplay === d ? 'none' : 'all')
 
     d3.selectAll('.display--option-text')
-      .style('font-weight', function(d){ return selectedDataDisplay === d ? 'bold' : 'auto'; })
-      .attr('opacity', function(d) { return selectedDataDisplay === d ? 1 : 0.5; })
+      .style('font-weight', d => selectedDataDisplay === d ? 'bold' : 'auto')
+      .attr('opacity', d => selectedDataDisplay === d ? 1 : 0.5)
   }
 
   function updateChart() {
@@ -381,7 +377,7 @@ function draw(data) {
 
     d3.select('.axis--y')
       .transition()
-      .call(d3.axisLeft(yScales).tickFormat(function(d) { return updateYAxis(d); }))
+      .call(d3.axisLeft(yScales).tickFormat(d => updateYAxis(d)))
       .duration(ANIMATE_DURATION)
       .delay(ANIMATE_DELAY)
 
@@ -400,18 +396,14 @@ function draw(data) {
       .selectAll('rect')
       .transition()
       .duration(ANIMATE_DURATION)
-      .delay(function(d) {
-        return selectedRiskDisplay === 1 ? ANIMATE_DELAY + ANIMATE_DURATION : ANIMATE_DELAY;
-      })
-      .attr('y', function(d) { return updateBarY(d); })
-      .attr('height', function(d) { return updateBarHeight(d); })
+      .delay(d => selectedRiskDisplay === 1 ? ANIMATE_DELAY + ANIMATE_DURATION : ANIMATE_DELAY)
+      .attr('y', d => updateBarY(d))
+      .attr('height', d => updateBarHeight(d))
 
     d3.selectAll('.risk_group')
       .transition()
       .duration(ANIMATE_DURATION)
-      .delay(function(d) {
-        return selectedRiskDisplay === 1 ? ANIMATE_DELAY : ANIMATE_DELAY + ANIMATE_DURATION;
-      })
+      .delay(d => selectedRiskDisplay === 1 ? ANIMATE_DELAY : ANIMATE_DELAY + ANIMATE_DURATION)
       .attr('opacity', function(d) { // display which bar to show/hide
         if (selectedRiskDisplay === 1 && d3.select(this).attr('value') !== selectedRisk) {
           return 0;
@@ -430,10 +422,7 @@ function draw(data) {
         yScales.domain([0, MAX_YS[selectedRisk]]);
     }
     else {
-        yScales.domain(
-          [0, d3.max(stackedData[stackedData.length - 1],
-          function(d) { return d[1]; })]
-        );
+        yScales.domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])]);
     }
   }
 
@@ -508,23 +497,17 @@ function draw(data) {
         .append('g')
         .attr('class', 'table--rows')
         .selectAll('text')
-        .data(function(d) { return d; }).enter()
+        .data(d => d).enter()
           .append('text')
 
     d3.selectAll('.table--rows')
       .data(tData)
-      .attr('transform', function(d,i) {
-          return 'translate(0,' + 20*(i+1) + ")";
-        })
-      .attr('font-weight', function(d) {
-        if (d[0].risk === 'Total') {
-          return 'bold';
-        }
-      })
+      .attr('transform', (d,i) => 'translate(0,' + 20*(i+1) + ")")
+      .attr('font-weight', d => d[0].risk === 'Total' ? 'bold' : 'auto')
       .selectAll('text')
-        .data(function(d) { return d; })
-        .attr('class', function(d,i) { return 'table--cells table--cells-' + i; })
-        .attr('x', function(d,i) { return 100+i*120; })
+        .data(d => d)
+        .attr('class', (d,i) => 'table--cells table--cells-' + i)
+        .attr('x', (d,i) => 100+i*120)
         .text(function(d, i) {
           if( i === 0) {
             return Object.values(d);
@@ -538,9 +521,7 @@ function draw(data) {
           if (i === 0 ){
             return 'bold';
           } else if (Object.values(d)[0] ===
-            d3.max(tData.slice(1,8), function(d){ return d[i][COLUMN_DATA[i-1]]; })) {
-              return 'bold';
-          }
+            d3.max(tData.slice(1,8), d => d[i][COLUMN_DATA[i-1]])) { return 'bold'; }
         })
   }
 
@@ -569,7 +550,8 @@ function draw(data) {
       fData.push({count: data[period][risk].count});
       fData.push({percent: sumData[period] === 0 ? 0 : data[period][risk].amount/sumData[period]*100});
       fData.push({amount: data[period][risk].amount});
-      fData.push({average: data[period][risk].count === 0 ? 0 : data[period][risk].amount/data[period][risk].count});
+      fData.push({average: data[period][risk].count === 0 ? 
+        0 : data[period][risk].amount/data[period][risk].count});
 
       flatTable.push(fData);
     }
