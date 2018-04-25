@@ -172,6 +172,11 @@ function draw(data) {
   /*
     Add legend and control whether to display all or only a certain risk level
   */
+  let legendTip = d3.select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0)
+
   let legend = g.append('g')
     .attr('font-size', 12)
     .attr('text-anchor', 'end')
@@ -192,6 +197,19 @@ function draw(data) {
       .attr('value', d => d)
       .attr('opacity', 1)
       .style('pointer-events', 'all')
+      .on('mouseover', function(d) {
+        legendTip.transition()
+          .duration(ANIMATE_DURATION)
+          .style('opacity', .9);
+        legendTip.html('Click for detail')
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on('mouseout', function(d) {
+        legendTip.transition()
+          .duration(ANIMATE_DURATION)
+          .style('opacity', 0)
+      })
       .on('click', function(d) {
         selectedRiskDisplay = (selectedRiskDisplay + 1) % 2;
         selectedRisk = d3.select(this).attr('value');
