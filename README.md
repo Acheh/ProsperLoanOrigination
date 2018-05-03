@@ -1,6 +1,21 @@
+# Prosper Quarterly Loan Origination Amount Data Visualization using D3.js
+Date Reviewed: 4/25/2018
+
 ## Summary
 
 Prosper, founded in California in 2005 and opened to the public on February 2, 2006, is a peer-to-peer lending platform that allows people to invest in each other by connecting investors and borrowers through its service. The company faced a rocky start in their early years as the global financial crisis of 2007-2008 hit market and the Securities and Exchange Commission (SEC) issued a cease and desist order on November 24, 2008, requiring them to register their business under the Security Act. In July 2009, Prosper relaunch their business after having obtained SEC registration for its loans. In this visualization project, I want to show the company's history through its quarterly loan origination performance from it first opened to public to the last quarter of 2013. Hopefully, viewers can see how the SEC cease and desist order impacted Prosper and how the company moved forward from it.
+
+## Installation
+
+Clone the repository into a local repository:
+```
+$ git clone https://github.com/Acheh/ProsperLoanOrigination.git
+$ cd ProsperLoanOrigination
+```
+
+You'll need a local server to view the project (index.html) in your browser. Here's a link on [a How do I setup a local HTTP server using Python](https://stackoverflow.com/questions/27977972/how-do-i-setup-a-local-http-server-using-python?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa)
+
+If you just want to see the product, you can click on the link provided in each version below.
 
 ## Design
 
